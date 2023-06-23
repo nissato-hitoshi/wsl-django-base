@@ -1,0 +1,5 @@
+Django==4.2.2
+mysqlclient==2.1.1
+django-allauth==0.54.0
+django-bootstrap5==23.3
+django-bootstrap-icons==0.8.3

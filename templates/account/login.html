@@ -1,0 +1,26 @@
+{% extends 'base_not_login.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row">
+      <div class="col-4"></div>
+      <div class="col-4">
+        <h1 class="m-5"></h1>
+        <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            {% bootstrap_form form layout='floating' %}
+            {% bootstrap_button button_type="submit" content="ログイン" size="lg" button_class="w-100 btn-primary" %}
+            <div class="m-3">
+                パスワードを忘れた方は <a class="button secondaryAction" href="{% url 'account_reset_password' %}">こちら</a>
+            </div>
+        </form>
+    </div>
+    <div class="col-4"></div>
+</div>
+{% endblock %}

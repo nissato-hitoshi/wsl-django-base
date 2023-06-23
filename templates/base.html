@@ -1,0 +1,103 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>{% block head_title %}{% endblock %}</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link href="{% static 'assets/css/base.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/styles.css' %}" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" href="{% url 'home' %}">Sample Site</a>
+        <!-- Sidebar Toggle-->
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+        <!-- Navbar Search-->
+        <div class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        </div>
+        <!-- Navbar-->
+        <form method="post" name"logout" id="logout" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        {% if user.is_authenticated %}
+                        <li><a class="dropdown-item" href="{% url 'account_change_password' %}">パスワード変更</a></li>
+                        <li><button class="dropdown-item" type="submit">ログアウト</button></li>
+                        {% else %}
+                        <li><a class="dropdown-item" href="{% url 'account_login' %}">ログイン</a></li>
+                        <li><a class="dropdown-item" href="{% url 'account_signup' %}">ユーザー登録</a></li>
+                        <li><a class="dropdown-item" href="{% url 'account_reset_password' %}">パスワード再設定</a></li>
+                        {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="/admin">管理サイト</a></li>
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </form>
+    </nav>
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Core</div>
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            ダッシュボード
+                        </a>
+                        <div class="sb-sidenav-menu-heading">Interface</div>
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                            モデル
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link" href="">売上予算</a>
+                                <a class="nav-link" href="">売上実績</a>
+                                <a class="nav-link" href="">バージョン管理</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    <div class="small">{{ user.email }}</div>
+                </div>
+            </nav>
+        </div>
+        <div id="layoutSidenav_content">
+            <main>
+                {% block content %}
+                {% endblock %}
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Your Website 2022</div>
+                        <div>
+                            <a href="#">Privacy Policy</a>
+                            &middot;
+                            <a href="#">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+<script src="{% static 'assets/js/scripts.js' %}"></script>
+</body>
+</html>

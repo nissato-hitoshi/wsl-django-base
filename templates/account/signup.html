@@ -1,0 +1,25 @@
+{% extends 'base_not_login.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <h1 class="mb-5">{% trans "Sign Up" %}</h1>
+            <form class="signup" method="POST" action="{% url 'account_signup' %}">
+                {% csrf_token %}
+                {% bootstrap_form form layout='floating' %}
+                {% bootstrap_button button_type="submit" content="登録" size="lg" button_class="w-100 btn-primary my-3" %}
+            </form>
+            <p class="m-3">すでにアカウントをお持ちであれば、こちらから <a href="{% url 'account_login' %}">ログイン</a> してください。</p>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
+{% endblock %}
