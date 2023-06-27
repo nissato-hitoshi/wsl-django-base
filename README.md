@@ -1,0 +1,1 @@
+# wsl-django-base
