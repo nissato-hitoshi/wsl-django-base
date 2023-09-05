@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+{% load humanize %}
+
+{% block head_title %}{% trans "Top" %}{% endblock %}
+
+{% block content %}
+<h3>Master TOP!!</h3>
+<div>
+    <a href="{% url 'home' %}">ホームへ</a>
+</div>
+<div>
+    <a href="{% url 'master.employee.index' %}">社員一覧</a>
+</div>
+<div>
+    <a href="{% url 'master.grade.index' %}">資格一覧</a>
+</div>
+<div>
+    <a href="{% url 'master.position.index' %}">役職一覧</a>
+</div>
+{% endblock %}

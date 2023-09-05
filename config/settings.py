@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 
 from pathlib import Path
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,10 +44,12 @@ INSTALLED_APPS = [
     'allauth',                      # 追加
     'allauth.account',              # 追加
     'allauth.socialaccount',        # 追加
-    'accounts',                     # 追加
     'django_bootstrap5',            # 追加
     'django_bootstrap_icons',       # 追加
     'django.contrib.humanize',      # 追加 書式指定用
+    'rest_framework',               # 追加
+    'accounts',                     # 追加
+    'master',                       # 追加
 ]
 
 MIDDLEWARE = [
@@ -123,6 +126,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+DATETIME_INPUT_FORMATS += ('%Y/%m/%d',)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

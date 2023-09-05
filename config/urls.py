@@ -16,10 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from . import views
 
+from .views import HomeView, AsyncView
+
+from master.api_urls import employee_router
+
+# API用 Url定義
+api_urlpatterns = [
+    path('employees/', include(employee_router.urls)),
+]
+
+# 通常 Url定義
 urlpatterns = [
-    path('', views.HomeView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='home'),
     path('admin/', admin.site.urls),
-    path('account/', include('allauth.urls')), # �ǉ�
+    path('account/', include('allauth.urls')),
+    path('master/', include('master.urls')),
+    path('async/', AsyncView.as_view(), name='async'),
+    path('api/1.0/', include(api_urlpatterns)),
 ]

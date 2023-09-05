@@ -65,9 +65,11 @@
                         </a>
                         <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="">売上予算</a>
-                                <a class="nav-link" href="">売上実績</a>
-                                <a class="nav-link" href="">バージョン管理</a>
+                                <a class="nav-link" href="{% url 'master.employee.index' %}">社員マスタ</a>
+                                <a class="nav-link" href="{% url 'master.grade.index' %}">資格マスタ</a>
+                                <a class="nav-link" href="{% url 'master.position.index' %}">役職マスタ</a>
+                                <a class="nav-link" href="{% url 'master.department.index' %}">部門マスタ</a>
+                                <a class="nav-link" href="{% url 'master.affiliation.index' %}">所属マスタ</a>
                             </nav>
                         </div>
                     </div>

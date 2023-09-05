@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+{% load humanize %}
+
+{% block head_title %}資格マスタ{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4 small">
+    <div class="row">
+        <div class="col-6">
+            <h4 class="mb-3">
+                <i class="fa-solid fa-table-list"></i> 資格一覧
+            </h4>
+        </div>
+        <div class="col-6 text-end">
+            <a class="btn btn-outline-secondary btn-sm mb-3 mx-2" data-bs-toggle="modal" href="#search_form" role="button">
+                <i class="fa-solid fa-filter"></i>
+            </a>
+            <a href="{% url 'master.grade.create' %}" class="btn btn-primary btn-sm mb-3">
+                <i class="fa-solid fa-file-circle-plus"></i> 新規追加
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-hover table-striped table-bordered table-sm small">
+            <thead class="table-light text-center">
+                <tr>
+                <th scope="col">資格名</th>
+                <th scope="col">資格コード</th>
+                <th scope="col">表示順</th>
+                <th scope="col">登録日時</th>
+                <th scope="col">更新日時</th>
+                <th>　</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.grade_name }}</td>
+                    <td class="text-center">{{ item.grade_code }}</td>
+                    <td class="text-center">{{ item.display_order }}</td>
+                    <td class="text-center">{{ item.created }}</td>
+                    <td class="text-center">{{ item.updated }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'master.grade.update' item.pk %}" class="btn btn-sm">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="{% url 'master.grade.delete' item.pk %}" class="btn btn-sm">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination justify-content-center">
+            {% bootstrap_pagination page_obj %}
+        </div>
+    </div>
+</div>
+{% endblock %}

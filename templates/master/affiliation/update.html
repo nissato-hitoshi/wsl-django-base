@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+
+{% block head_title %}所属情報 編集{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4 small">
+  <div class="row">
+    <div class="col-2"></div>
+    <div class="col">
+      <form method="POST">
+        <div class="row mb-3">
+          <div class="col-6">
+            <h4>所属情報 編集</h4>
+          </div>
+          <div class="col-6 text-end">
+            <button type="submit" class="btn btn-primary btn-md">
+              <i class="fa-solid fa-floppy-disk"></i> 保存
+            </button>
+            <a href="{% url 'master.affiliation.index' %}" class="btn btn-secondary btn-md">
+              <i class="fa-solid fa-ban"></i> キャンセル
+            </a>
+          </div>
+        </div>
+        {% csrf_token %}
+        {% bootstrap_form form layout='floating' %}
+        <div class="mb-3 form-floating">
+          <input type="text" value="{{ item.created }}" class="form-control" disabled readonly>
+          <label class="form-label">登録日時</label>
+        </div>
+        <div class="mb-3 form-floating">
+          <input type="text" value="{{ item.updated }}" class="form-control" disabled readonly>
+          <label class="form-label">更新日時</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-md">
+          <i class="fa-solid fa-floppy-disk"></i> 保存
+        </button>
+        <a href="{% url 'master.affiliation.index' %}" class="btn btn-secondary btn-md">
+          <i class="fa-solid fa-ban"></i> キャンセル
+        </a>
+      </form>
+    </div>
+    <div class="col-2"></div>
+  </div>
+</div>
+{% endblock %}
