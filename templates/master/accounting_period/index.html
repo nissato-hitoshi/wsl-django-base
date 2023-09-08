@@ -5,14 +5,14 @@
 {% load i18n %}
 {% load humanize %}
 
-{% block head_title %}所属マスタ{% endblock %}
+{% block head_title %}会計期間マスタ{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4 small">
     <div class="row">
         <div class="col-6">
             <h4 class="mb-3">
-                <i class="fa-solid fa-table-list"></i> 所属一覧
+                <i class="fa-solid fa-table-list"></i> 会計期間一覧
             </h4>
         </div>
         <div class="col-6 text-end">
@@ -22,7 +22,7 @@
             <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#upload_form" role="button">
                 <i class="fa-solid fa-upload"></i>
             </a>
-            <a href="{% url 'master.affiliation.create' %}" class="btn btn-primary btn-sm mb-3">
+            <a href="{% url 'master.accounting_period.create' %}" class="btn btn-primary btn-sm mb-3">
                 <i class="fa-solid fa-file-circle-plus"></i> 新規追加
             </a>
         </div>
@@ -41,10 +41,7 @@
                 <th scope="col">会計期</th>
                 <th scope="col">開始日</th>
                 <th scope="col">終了日</th>
-                <th scope="col">部門</th>
-                <th scope="col">役職</th>
-                <th scope="col">資格</th>
-                <th scope="col">氏名</th>
+                <th scope="col">タイトル</th>
                 <th scope="col">登録日時</th>
                 <th scope="col">更新日時</th>
                 <th>　</th>
@@ -53,20 +50,17 @@
             <tbody class="align-middle">
             {% for item in items %}
                 <tr>
-                    <td class="text-center">{{ item.accounting_period }}</td>
+                    <td class="text-center">{{ item.get_accounting_period_display }}</td>
                     <td class="text-center">{{ item.start_date|date:"Y/m/d" }}</td>
                     <td class="text-center">{{ item.end_date|date:"Y/m/d" }}</td>
-                    <td>{{ item.department|default:"" }}</td>
-                    <td>{{ item.position|default:"" }}</td>
-                    <td>{{ item.grade|default:"" }}</td>
-                    <td>{{ item.employee }}</td>
+                    <td>{{ item.get_accounting_period_title }}</td>
                     <td class="text-center">{{ item.created|date:"Y/m/d H:i:s" }}</td>
                     <td class="text-center">{{ item.updated|date:"Y/m/d H:i:s" }}</td>
                     <td class="text-center">
-                        <a href="{% url 'master.affiliation.update' item.pk %}" class="btn btn-sm">
+                        <a href="{% url 'master.accounting_period.update' item.pk %}" class="btn btn-sm">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="{% url 'master.affiliation.delete' item.pk %}" class="btn btn-sm">
+                        <a href="{% url 'master.accounting_period.delete' item.pk %}" class="btn btn-sm">
                             <i class="fa-solid fa-trash-can"></i>
                         </a>
                     </td>
@@ -110,7 +104,7 @@
     </div>
     <!-- Search Modal -->
     <div class="modal fade" id="search_form" tabindex="-1" aria-labelledby="search_form_label" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form class="" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -120,7 +114,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        {% bootstrap_form search_form layout='horizontal' size='sm' %}
+                        <div class="mb-3">
+                            <label for="search_value" class="form-label">検索文字</label>
+                            <input class="form-control form-control-sm" id="search_value" name="search_value" type="text" placeholder="会計期で検索" value="{{ search_value }}" />
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary btn-sm">

@@ -20,4 +20,4 @@ class Employee(models.Model):
         ordering = ['-updated']
     
     def __str__(self):
-        return str(self.employee_no + '：' + self.name)
+        return str(self.name)

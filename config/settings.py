@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',               # 追加
     'accounts',                     # 追加
     'master',                       # 追加
+    'django_filters',               # 追加
 ]
 
 MIDDLEWARE = [
@@ -82,6 +83,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -127,6 +131,8 @@ USE_I18N = True
 USE_TZ = True
 
 DATETIME_INPUT_FORMATS += ('%Y/%m/%d',)
+
+NUMBER_GROUPING = 3
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

@@ -25,7 +25,7 @@ class EmployeeListView(LoginRequiredMixin, ListView):
 
     def convert_string_to_date(self, value, defalut=None):
         
-        val = self.nvl(value, None)
+        val = self.nvl(value, defalut)
 
         if val is not None:
             date_val = datetime.strptime(str(val), '%Y-%m-%d %H:%M:%S')
@@ -37,6 +37,8 @@ class EmployeeListView(LoginRequiredMixin, ListView):
 
         # sessionに値がある場合、その値でクエリ発行する。
         if 'search_value' in self.request.session:
+
+            # セッションから検索情報取得
             search_value = self.request.session['search_value']
 
             # 検索条件
@@ -45,15 +47,18 @@ class EmployeeListView(LoginRequiredMixin, ListView):
             condition3 = Q()
             condition4 = Q()
 
+            # 検索文字が指定されている場合、条件設定
             if len(search_value) != 0:
                 condition1 = Q(employee_no__istartswith=search_value)
                 condition2 = Q(name__istartswith=search_value)
                 condition3 = Q(employee_code__istartswith=search_value)
                 condition4 = Q(email__istartswith=search_value)
 
+            # 検索条件を指定して検索結果取得
             return Employee.objects.select_related().filter(condition1 | condition2 | condition3 | condition4)
 
         else:
+            # 検索条件指定なしの場合、全件取得
             return Employee.objects.all()
 
     def get_context_data(self, **kwargs):
@@ -69,6 +74,79 @@ class EmployeeListView(LoginRequiredMixin, ListView):
 
         return context
 
+    def import_employee(self, upload_file):
+
+        try:
+            rc = True
+
+            # アップロードファイルのオープン
+            wb = openpyxl.load_workbook(upload_file, data_only=True)
+
+            # 「sheet2」シートを参照
+            ws = wb['Sheet2']
+
+            # 一括追加用配列
+            insert_items = []
+            update_items = []
+
+            i = 2
+            while i <= ws.max_row:
+
+                # 同じ社員番号のデータ取得
+                result = Employee.objects.filter(employee_no=str(ws.cell(row=i, column=1).value))
+
+                # 同じ社員番号データ存在確認
+                if not result.exists():
+
+                    # 存在しない場合、新規登録
+                    item = Employee(
+                        employee_no = ws.cell(row=i, column=1).value,
+                        name = ws.cell(row=i, column=2).value,
+                        employee_code = ws.cell(row=i, column=3).value,
+                        email = ws.cell(row=i, column=4).value,
+                        date_of_birth = self.convert_string_to_date(ws.cell(row=i, column=5).value),
+                        hire_date = self.convert_string_to_date(ws.cell(row=i, column=6).value),
+                        retirement_date = self.convert_string_to_date(ws.cell(row=i, column=7).value),
+                    )
+
+                    insert_items.append(item)
+                else:
+                    # 存在する場合、更新
+                    item = result.get()
+                    
+                    item.name = ws.cell(row=i, column=2).value
+                    item.employee_code = ws.cell(row=i, column=3).value
+                    item.email = ws.cell(row=i, column=4).value
+                    item.date_of_birth = self.convert_string_to_date(ws.cell(row=i, column=5).value, None)
+                    item.hire_date = self.convert_string_to_date(ws.cell(row=i, column=6).value, None)
+                    item.retirement_date = self.convert_string_to_date(ws.cell(row=i, column=7).value, None)
+                    item.updated = datetime.now()
+
+                    update_items.append(item)
+
+                i = i + 1
+
+            # 更新リストデータが存在する場合
+            if len(update_items) > 0:
+                Employee.objects.bulk_update(update_items, ['name', 'employee_code', 'email', 'date_of_birth', 'hire_date', 'retirement_date','updated'])
+
+            # 新規リストデータが存在する場合
+            if len(insert_items) > 0:
+                Employee.objects.bulk_create(insert_items)
+
+            wb.close()
+            rc = True
+
+        except Exception as e:
+            print('Exception In !!')
+            print(e)
+            rc = False
+
+        finally:
+            print('all finish')
+
+        return rc
+    
     def post(self, request, *args, **kwargs):
 
         try:
@@ -77,61 +155,9 @@ class EmployeeListView(LoginRequiredMixin, ListView):
 
                 upload_file = self.request.FILES['upload_file']
 
-                # アップロードファイルのオープン
-                wb = openpyxl.load_workbook(upload_file, data_only=True)
-
-                # 「sheet2」シートを参照
-                ws = wb['Sheet2']
-
-                # 一括追加用配列
-                insert_items = []
-                update_items = []
-
-                i = 2
-                while i <= ws.max_row:
-
-                    # 同じ社員番号のデータ取得
-                    result = Employee.objects.filter(employee_no=str(ws.cell(row=i, column=1).value))
-
-                    # 同じ社員番号データ存在確認
-                    if not result.exists():
-
-                        # 存在しない場合、新規登録
-                        item = Employee(
-                            employee_no = ws.cell(row=i, column=1).value,
-                            name = ws.cell(row=i, column=2).value,
-                            employee_code = ws.cell(row=i, column=3).value,
-                            email = ws.cell(row=i, column=4).value,
-                            date_of_birth = self.convert_string_to_date(ws.cell(row=i, column=5).value),
-                            hire_date = self.convert_string_to_date(ws.cell(row=i, column=6).value),
-                            retirement_date = self.convert_string_to_date(ws.cell(row=i, column=7).value),
-                        )
-
-                        insert_items.append(item)
-                    else:
-                        # 存在する場合、更新
-                        item = result.get()
-                        
-                        item.name = ws.cell(row=i, column=2).value
-                        item.employee_code = ws.cell(row=i, column=3).value
-                        item.email = ws.cell(row=i, column=4).value
-                        item.date_of_birth = self.convert_string_to_date(ws.cell(row=i, column=5).value, None)
-                        item.hire_date = self.convert_string_to_date(ws.cell(row=i, column=6).value, None)
-                        item.retirement_date = self.convert_string_to_date(ws.cell(row=i, column=7).value, None)
-
-                        update_items.append(item)
-
-                    i = i + 1
-
-                # 更新リストデータが存在する場合
-                if len(update_items) > 0:
-                    Employee.objects.bulk_update(update_items, ['name', 'employee_code', 'email', 'date_of_birth', 'hire_date', 'retirement_date'])
-
-                # 新規リストデータが存在する場合
-                if len(insert_items) > 0:
-                    Employee.objects.bulk_create(insert_items)
-
-                wb.close()
+                # ファイルインポート処理
+                if not self.import_employee(upload_file):
+                    print('import_employee Error !!')
 
             # 検索時
             elif self.request.POST.get('mode', '') == 'search':

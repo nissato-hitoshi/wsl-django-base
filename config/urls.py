@@ -19,12 +19,7 @@ from django.urls import path, include
 
 from .views import HomeView, AsyncView
 
-from master.api_urls import employee_router
-
-# API用 Url定義
-api_urlpatterns = [
-    path('employees/', include(employee_router.urls)),
-]
+from master.api_urls import api_urlpatterns
 
 # 通常 Url定義
 urlpatterns = [
@@ -32,6 +27,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('allauth.urls')),
     path('master/', include('master.urls')),
-    path('async/', AsyncView.as_view(), name='async'),
     path('api/1.0/', include(api_urlpatterns)),
 ]

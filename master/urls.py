@@ -1,19 +1,20 @@
 from django.urls import path, include
 
 from .views import TopView
-from .views import SampleView, AsyncView
+from .views import SampleView
 from .views import EmployeeListView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
 from .views import GradeListView, GradeCreateView, GradeUpdateView, GradeDeleteView
 from .views import PositionListView, PositionCreateView, PositionUpdateView, PositionDeleteView
 from .views import DepartmentListView, DepartmentCreateView, DepartmentUpdateView, DepartmentDeleteView
 from .views import AffiliationListView, AffiliationCreateView, AffiliationUpdateView, AffiliationDeleteView
+from .views import AccountingPeriodListView, AccountingPeriodCreateView, AccountingPeriodUpdateView, AccountingPeriodDeleteView
+from .views import CostListView, CostCreateView, CostUpdateView, CostDeleteView
 
 urlpatterns = [
 
     # top
     path('', TopView.as_view(), name='master.top'),
     path('sample', SampleView.as_view(), name='master.sample'),
-    path('async', AsyncView.as_view(), name='master.async'),
  
     # employee
     path('employee/index', EmployeeListView.as_view(), name='master.employee.index'),
@@ -44,4 +45,16 @@ urlpatterns = [
     path('affiliation/create', AffiliationCreateView.as_view(), name='master.affiliation.create'),
     path('affiliation/update/<int:pk>/', AffiliationUpdateView.as_view(), name='master.affiliation.update'),
     path('affiliation/delete/<int:pk>/', AffiliationDeleteView.as_view(), name='master.affiliation.delete'),
+
+    # accounting_period
+    path('accounting_period/index', AccountingPeriodListView.as_view(), name='master.accounting_period.index'),
+    path('accounting_period/create', AccountingPeriodCreateView.as_view(), name='master.accounting_period.create'),
+    path('accounting_period/update/<int:pk>/', AccountingPeriodUpdateView.as_view(), name='master.accounting_period.update'),
+    path('accounting_period/delete/<int:pk>/', AccountingPeriodDeleteView.as_view(), name='master.accounting_period.delete'),
+
+    # cost
+    path('cost/index', CostListView.as_view(), name='master.cost.index'),
+    path('cost/create', CostCreateView.as_view(), name='master.cost.create'),
+    path('cost/update/<int:pk>/', CostUpdateView.as_view(), name='master.cost.update'),
+    path('cost/delete/<int:pk>/', CostDeleteView.as_view(), name='master.cost.delete'),
 ]

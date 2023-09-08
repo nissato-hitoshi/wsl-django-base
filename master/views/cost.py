@@ -7,12 +7,12 @@ import openpyxl
 from datetime import datetime
 from django.db.models import Q
 
-from master.models import Affiliation, Department, Grade, Position, Employee
-from master.forms import AffiliationForm, AffiliationSearchForm
+from master.models import Cost, Employee, AccountingPeriod
+from master.forms import CostForm, CostSearchForm, CostImportForm
 
-class AffiliationListView(LoginRequiredMixin, ListView):
-    template_name = 'master/affiliation/index.html'
-    model = Affiliation
+class CostListView(LoginRequiredMixin, ListView):
+    template_name = 'master/cost/index.html'
+    model = Cost
     paginate_by = 10
     context_object_name = 'items'
 
@@ -43,24 +43,16 @@ class AffiliationListView(LoginRequiredMixin, ListView):
 
             # 検索条件
             condition1 = Q()
-            condition2 = Q()
-            condition3 = Q()
-            condition4 = Q()
 
             # 検索文字が指定されている場合、条件設定
             if len(search_values[1]) != 0:
                 condition1 = Q(employee__name__istartswith=search_values[1])
-                condition2 = Q(department__department_name__istartswith=search_values[1])
-                condition3 = Q(position__position_name__istartswith=search_values[1])
-                condition4 = Q(grade__grade_name__istartswith=search_values[1])
 
             # 検索条件を指定して検索結果取得
-            return Affiliation.objects.select_related().filter(condition1 | condition2 | condition3 | condition4).order_by(
-                    'accounting_period', 'department__display_order', 'position__display_order', 'grade__display_order')
+            return Cost.objects.select_related().filter(condition1)
         else:
             # 検索条件指定なしの場合、全件取得
-            return Affiliation.objects.all().order_by(
-                    'accounting_period', 'department__display_order', 'position__display_order', 'grade__display_order')
+            return Cost.objects.all()
 
     def get_context_data(self, **kwargs):
 
@@ -79,49 +71,43 @@ class AffiliationListView(LoginRequiredMixin, ListView):
                 'search_value': '',
             }
 
-        context['search_form'] = AffiliationSearchForm(initial=default_data)
+        context['search_form'] = CostSearchForm(initial=default_data)
+        context['import_form'] = CostImportForm()
 
         return context
 
-    def import_affiliation(self, upload_file):
+    def import_cost(self, upload_file, accounting_period_id):
 
         try:
             # アップロードファイルのオープン
             wb = openpyxl.load_workbook(upload_file, data_only=True)
 
-            # 「sheet1」シートを参照
-            ws = wb['Sheet1']
+            print(str(accounting_period_id))
+
+            # 先頭シートを参照
+            ws = wb.worksheets[0]
 
             # 一括追加用配列
             insert_items = []
             update_items = []
 
+            # 会計期データ取得
+            lists = AccountingPeriod.objects.filter(id=accounting_period_id)
+
+            if len(lists) == 0:
+                print('会計期を登録してください。：' + str(accounting_period_id))
+                accounting_period = None
+            else:
+                accounting_period = lists[0]
+
             i = 2
             while i <= ws.max_row:
 
-                # 部門の取得
-                lists = Department.objects.filter(department_name=str(ws.cell(row=i, column=4).value))
-                if len(lists) == 0:
-                    department = None
-                else:
-                    department = lists[0]
-
-                # 役職の取得
-                lists = Position.objects.filter(position_name=str(ws.cell(row=i, column=5).value))
-                if len(lists) == 0:
-                    position = None
-                else:
-                    position = lists[0]
-
-                # 資格の取得
-                lists = Grade.objects.filter(grade_name=str(ws.cell(row=i, column=6).value))
-                if len(lists) == 0:
-                    grade = None
-                else:
-                    grade = lists[0]
+                # b列（社員番号）の取得
+                col_b = str(ws.cell(row=i, column=2).value)
 
                 # 社員情報の取得
-                lists = Employee.objects.filter(name=str(ws.cell(row=i, column=7).value))
+                lists = Employee.objects.filter(employee_no=col_b)
                 if len(lists) == 0:
                     employee = None
                 else:
@@ -129,25 +115,24 @@ class AffiliationListView(LoginRequiredMixin, ListView):
 
                 # 社員情報登録済の場合のみ追加・更新対象
                 if employee is None:
-                    print('未登録ユーザー：' + str(ws.cell(row=i, column=7).value))
+                    print('未登録ユーザー：' + col_b)
                 else:
                     # 会計期と氏名が同じデータ取得
-                    result = Affiliation.objects.filter(
-                        accounting_period=int(ws.cell(row=i, column=1).value)
-                        ,employee_id=int(employee.id))
+                    result = Cost.objects.filter(
+                        accounting_period_id=accounting_period_id, employee_id=int(employee.id))
 
                     # 同じデータ存在確認
                     if not result.exists():
 
                         # 存在しない場合、新規登録
-                        item = Affiliation(
-                            accounting_period = ws.cell(row=i, column=1).value,
-                            start_date = self.convert_string_to_date(ws.cell(row=i, column=2).value, None),
-                            end_date = self.convert_string_to_date(ws.cell(row=i, column=3).value, None),
-                            department = department,
-                            position = position,
-                            grade = grade,
+                        item = Cost(
+                            accounting_period = accounting_period,
                             employee = employee,
+                            cost1 = int(ws.cell(row=i, column=4).value),
+                            cost2 = int(ws.cell(row=i, column=5).value),
+                            cost3 = int(ws.cell(row=i, column=7).value),
+                            cost4 = int(ws.cell(row=i, column=8).value),
+                            cost_total = int(ws.cell(row=i, column=9).value),
                         )
 
                         insert_items.append(item)
@@ -155,26 +140,26 @@ class AffiliationListView(LoginRequiredMixin, ListView):
                         # 存在する場合、更新
                         item = result.get()
                         
-                        item.start_date = self.convert_string_to_date(ws.cell(row=i, column=2).value, None)
-                        item.end_date = self.convert_string_to_date(ws.cell(row=i, column=3).value, None)
-                        item.department = department
-                        item.position = position
-                        item.grade = grade
+                        cost1 = int(ws.cell(row=i, column=4).value),
+                        cost2 = int(ws.cell(row=i, column=5).value),
+                        cost3 = int(ws.cell(row=i, column=7).value),
+                        cost4 = int(ws.cell(row=i, column=8).value),
+                        cost_total = int(ws.cell(row=i, column=9).value),
                         item.updated = datetime.now()
 
                         update_items.append(item)
 
-                    i = i + 1
+                i = i + 1
 
             # 更新リストデータが存在する場合
             if len(update_items) > 0:
                 print('update : ' + str(len(update_items)))
-                Affiliation.objects.bulk_update(update_items, ['start_date','end_date','department','position','grade','updated'])
+                Cost.objects.bulk_update(update_items, ['cost1','cost2','cost3','cost4','cost_total','updated'])
 
             # 新規リストデータが存在する場合
             if len(insert_items) > 0:
                 print('insert : ' + str(len(insert_items)))
-                Affiliation.objects.bulk_create(insert_items)
+                Cost.objects.bulk_create(insert_items)
 
             wb.close()
             rc = True
@@ -196,10 +181,11 @@ class AffiliationListView(LoginRequiredMixin, ListView):
             if self.request.POST.get('mode', '') == 'upload':
 
                 upload_file = self.request.FILES['upload_file']
+                accounting_period_id = self.request.POST.get('search_accounting_period', '')
 
                 # 役職ファイルアプロード処理
-                if not self.import_affiliation(upload_file):
-                    print('import_affiliation Error !!')
+                if not self.import_cost(upload_file, accounting_period_id):
+                    print('import_cost Error !!')
 
             # 検索時
             elif self.request.POST.get('mode', '') == 'search':
@@ -210,9 +196,6 @@ class AffiliationListView(LoginRequiredMixin, ListView):
                     self.request.POST.get('search_value', ''),
                 ]
                 request.session['search_values'] = search_values
-
-                # セッションに検索値を設定
-#                request.session['search_value'] = self.request.POST.get('search_value', '')
 
         except Exception as e:
             print('Exception In !!')
@@ -226,27 +209,27 @@ class AffiliationListView(LoginRequiredMixin, ListView):
             self.request.GET.clear()
             return self.get(request, *args, **kwargs)
 
-class AffiliationCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'master/affiliation/create.html'
-    model = Affiliation
-    form_class = AffiliationForm
-    success_url = reverse_lazy('master.affiliation.index')
+class CostCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'master/cost/create.html'
+    model = Cost
+    form_class = CostForm
+    success_url = reverse_lazy('master.cost.index')
 
-class AffiliationUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'master/affiliation/update.html'
-    model = Affiliation
-    form_class = AffiliationForm
-    success_url = reverse_lazy('master.affiliation.index')
+class CostUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'master/cost/update.html'
+    model = Cost
+    form_class = CostForm
+    success_url = reverse_lazy('master.cost.index')
     context_object_name = 'item'
 
     def form_valid(self, form):
-        Affiliation = form.save(commit=False)
-        Affiliation.updated = timezone.now()
-        Affiliation.save()
+        Cost = form.save(commit=False)
+        Cost.updated = timezone.now()
+        Cost.save()
         return super().form_valid(form)
 
-class AffiliationDeleteView(LoginRequiredMixin, DeleteView):
-    template_name = 'master/affiliation/delete.html'
-    model = Affiliation
-    success_url = reverse_lazy('master.affiliation.index')
+class CostDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'master/cost/delete.html'
+    model = Cost
+    success_url = reverse_lazy('master.cost.index')
     context_object_name = 'item'

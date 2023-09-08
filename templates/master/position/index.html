@@ -16,8 +16,11 @@
             </h4>
         </div>
         <div class="col-6 text-end">
-            <a class="btn btn-outline-secondary btn-sm mb-3 mx-2" data-bs-toggle="modal" href="#search_form" role="button">
+            <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#search_form" role="button">
                 <i class="fa-solid fa-filter"></i>
+            </a>
+            <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#upload_form" role="button">
+                <i class="fa-solid fa-upload"></i>
             </a>
             <a href="{% url 'master.position.create' %}" class="btn btn-primary btn-sm mb-3">
                 <i class="fa-solid fa-file-circle-plus"></i> 新規追加
@@ -25,25 +28,32 @@
         </div>
     </div>
     <div class="row">
+        {% if items|length == 0 %}
+        <div class="col-8 offset-2">
+            <div class="alert alert-warning" role="alert">
+                検索結果が存在しません。
+            </div>
+        </div>
+        {% else %}
         <table class="table table-hover table-striped table-bordered table-sm small">
             <thead class="table-light text-center">
                 <tr>
-                <th scope="col">役職名</th>
-                <th scope="col">役職コード</th>
-                <th scope="col">表示順</th>
-                <th scope="col">登録日時</th>
-                <th scope="col">更新日時</th>
-                <th>　</th>
+                    <th scope="col">役職コード</th>
+                    <th scope="col">役職名</th>
+                    <th scope="col">表示順</th>
+                    <th scope="col">登録日時</th>
+                    <th scope="col">更新日時</th>
+                    <th>　</th>
                 </tr>
             </thead>
             <tbody class="align-middle">
             {% for item in items %}
                 <tr>
-                    <td>{{ item.position_name }}</td>
                     <td class="text-center">{{ item.position_code }}</td>
+                    <td>{{ item.position_name }}</td>
                     <td class="text-center">{{ item.display_order }}</td>
-                    <td class="text-center">{{ item.created }}</td>
-                    <td class="text-center">{{ item.updated }}</td>
+                    <td class="text-center">{{ item.created|date:"Y/m/d H:i:s" }}</td>
+                    <td class="text-center">{{ item.updated|date:"Y/m/d H:i:s" }}</td>
                     <td class="text-center">
                         <a href="{% url 'master.position.update' item.pk %}" class="btn btn-sm">
                             <i class="fa-solid fa-pen-to-square"></i>
@@ -58,6 +68,65 @@
         </table>
         <div class="pagination justify-content-center">
             {% bootstrap_pagination page_obj %}
+        </div>
+        {% endif %}
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="upload_form" tabindex="-1" aria-labelledby="upload_form_label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input id="mode" name="mode" type="hidden" value="upload" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="search_form_label">ファイルアップロード</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="upload_file" class="form-label">インポートファイル</label>
+                            <input class="form-control form-control-sm" id="upload_file" name="upload_file" type="file" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-upload"></i> アップロード
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> 閉じる
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Search Modal -->
+    <div class="modal fade" id="search_form" tabindex="-1" aria-labelledby="search_form_label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input id="mode" name="mode" type="hidden" value="search" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="search_form_label">検索条件</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="search_value" class="form-label">検索文字</label>
+                            <input class="form-control form-control-sm" id="search_value" name="search_value" type="text" placeholder="役職名で検索" value="{{ search_value }}" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-magnifying-glass"></i> 検索
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> 閉じる
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

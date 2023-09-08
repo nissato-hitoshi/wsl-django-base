@@ -14,6 +14,7 @@
     <link href="{% static 'assets/css/base.css' %}" rel="stylesheet" />
     <link href="{% static 'assets/css/styles.css' %}" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -70,6 +71,8 @@
                                 <a class="nav-link" href="{% url 'master.position.index' %}">役職マスタ</a>
                                 <a class="nav-link" href="{% url 'master.department.index' %}">部門マスタ</a>
                                 <a class="nav-link" href="{% url 'master.affiliation.index' %}">所属マスタ</a>
+                                <a class="nav-link" href="{% url 'master.accounting_period.index' %}">会計期間マスタ</a>
+                                <a class="nav-link" href="{% url 'master.cost.index' %}">原価マスタ</a>
                             </nav>
                         </div>
                     </div>

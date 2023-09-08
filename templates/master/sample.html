@@ -9,6 +9,9 @@
 
 {% block content %}
 <div>
-    <input type="text" name="search" value="" size="100" placeholder="検索文字列を入力してください。" />
+    <input type="text" id="keyword" name="keyword" value="" size="100" placeholder="検索文字列を入力してください。" />
+    <div id="result">
+    </div>
 </div>
+<script type="text/javascript" src="{% static 'assets/js/test.js' %}"></script>
 {% endblock %}

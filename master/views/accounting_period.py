@@ -7,14 +7,31 @@ import openpyxl
 from datetime import datetime
 from django.db.models import Q
 
-from master.models import Grade
-from master.forms import GradeForm
+from master.models import AccountingPeriod
+from master.forms import AccountingPeriodForm
 
-class GradeListView(LoginRequiredMixin, ListView):
-    template_name = 'master/grade/index.html'
-    model = Grade
+class AccountingPeriodListView(LoginRequiredMixin, ListView):
+    template_name = 'master/accounting_period/index.html'
+    model = AccountingPeriod
     paginate_by = 10
     context_object_name = 'items'
+
+    def nvl(self, value, default=''):
+        if value is None:
+            val = default
+        else:
+            val = str(value).strip()
+        return val
+
+    def convert_string_to_date(self, value, defalut=None):
+        
+        val = self.nvl(value, defalut)
+
+        if val is not None:
+            date_val = datetime.strptime(str(val), '%Y-%m-%d %H:%M:%S')
+            val = date_val.strftime('%Y-%m-%d')
+
+        return val
 
     def get_queryset(self):
 
@@ -26,19 +43,17 @@ class GradeListView(LoginRequiredMixin, ListView):
 
             # 検索条件
             condition1 = Q()
-            condition2 = Q()
 
             # 検索文字が指定されている場合、条件設定
             if len(search_value) != 0:
-                condition1 = Q(grade_name__istartswith=search_value)
-                condition2 = Q(grade_code__istartswith=search_value)
+                condition1 = Q(accounting_period__istartswith=search_value)
 
             # 検索条件を指定して検索結果取得
-            return Grade.objects.select_related().filter(condition1 | condition2).order_by('display_order')
+            return AccountingPeriod.objects.select_related().filter(condition1)
 
         else:
             # 検索条件指定なしの場合、全件取得
-            return Grade.objects.all().order_by('display_order')
+            return AccountingPeriod.objects.all()
 
     def get_context_data(self, **kwargs):
         print("get_context_data in")
@@ -54,7 +69,8 @@ class GradeListView(LoginRequiredMixin, ListView):
 
         return context
 
-    def import_grade(self, upload_file):
+    def import_accounting_period(self, upload_file):
+
         try:
             # アップロードファイルのオープン
             wb = openpyxl.load_workbook(upload_file, data_only=True)
@@ -69,17 +85,17 @@ class GradeListView(LoginRequiredMixin, ListView):
             i = 2
             while i <= ws.max_row:
 
-                # 同じ資格コードのデータ取得
-                result = Grade.objects.filter(grade_code=str(ws.cell(row=i, column=1).value))
+                # 会計期と氏名が同じデータ取得
+                result = AccountingPeriod.objects.filter(accounting_period=int(ws.cell(row=i, column=1).value))
 
-                # 同じ資格コードデータ存在確認
+                # 同じデータ存在確認
                 if not result.exists():
 
                     # 存在しない場合、新規登録
-                    item = Grade(
-                        grade_code = ws.cell(row=i, column=1).value,
-                        grade_name = ws.cell(row=i, column=2).value,
-                        display_order = ws.cell(row=i, column=3).value,
+                    item = AccountingPeriod(
+                        accounting_period = ws.cell(row=i, column=1).value,
+                        start_date = self.convert_string_to_date(ws.cell(row=i, column=2).value, None),
+                        end_date = self.convert_string_to_date(ws.cell(row=i, column=3).value, None),
                     )
 
                     insert_items.append(item)
@@ -87,8 +103,8 @@ class GradeListView(LoginRequiredMixin, ListView):
                     # 存在する場合、更新
                     item = result.get()
                     
-                    item.grade_name = ws.cell(row=i, column=2).value
-                    item.display_order = ws.cell(row=i, column=3).value
+                    item.start_date = self.convert_string_to_date(ws.cell(row=i, column=2).value, None)
+                    item.end_date = self.convert_string_to_date(ws.cell(row=i, column=3).value, None)
                     item.updated = datetime.now()
 
                     update_items.append(item)
@@ -97,11 +113,13 @@ class GradeListView(LoginRequiredMixin, ListView):
 
             # 更新リストデータが存在する場合
             if len(update_items) > 0:
-                Grade.objects.bulk_update(update_items, ['grade_name', 'display_order','updated'])
+                print('update : ' + str(len(update_items)))
+                AccountingPeriod.objects.bulk_update(update_items, ['start_date','end_date','updated'])
 
             # 新規リストデータが存在する場合
             if len(insert_items) > 0:
-                Grade.objects.bulk_create(insert_items)
+                print('insert : ' + str(len(insert_items)))
+                AccountingPeriod.objects.bulk_create(insert_items)
 
             wb.close()
             rc = True
@@ -124,9 +142,9 @@ class GradeListView(LoginRequiredMixin, ListView):
 
                 upload_file = self.request.FILES['upload_file']
 
-                # 資格ファイルアプロード処理
-                if not self.import_grade(upload_file):
-                    print('import_grade Error !!')
+                # 役職ファイルアプロード処理
+                if not self.import_accounting_period(upload_file):
+                    print('import_accounting_period Error !!')
 
             # 検索時
             elif self.request.POST.get('mode', '') == 'search':
@@ -146,27 +164,27 @@ class GradeListView(LoginRequiredMixin, ListView):
             self.request.GET.clear()
             return self.get(request, *args, **kwargs)
 
-class GradeCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'master/grade/create.html'
-    model = Grade
-    form_class = GradeForm
-    success_url = reverse_lazy('master.grade.index')
+class AccountingPeriodCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'master/accounting_period/create.html'
+    model = AccountingPeriod
+    form_class = AccountingPeriodForm
+    success_url = reverse_lazy('master.accounting_period.index')
 
-class GradeUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'master/grade/update.html'
-    model = Grade
-    form_class = GradeForm
-    success_url = reverse_lazy('master.grade.index')
+class AccountingPeriodUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'master/accounting_period/update.html'
+    model = AccountingPeriod
+    form_class = AccountingPeriodForm
+    success_url = reverse_lazy('master.accounting_period.index')
     context_object_name = 'item'
 
     def form_valid(self, form):
-        Grade = form.save(commit=False)
-        Grade.updated = timezone.now()
-        Grade.save()
+        Affiliation = form.save(commit=False)
+        Affiliation.updated = timezone.now()
+        Affiliation.save()
         return super().form_valid(form)
 
-class GradeDeleteView(LoginRequiredMixin, DeleteView):
-    template_name = 'master/grade/delete.html'
-    model = Grade
-    success_url = reverse_lazy('master.grade.index')
+class AccountingPeriodDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'master/accounting_period/delete.html'
+    model = AccountingPeriod
+    success_url = reverse_lazy('master.accounting_period.index')
     context_object_name = 'item'
