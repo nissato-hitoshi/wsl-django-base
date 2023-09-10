@@ -76,6 +76,41 @@ class CostListView(LoginRequiredMixin, ListView):
 
         return context
 
+    def post(self, request, *args, **kwargs):
+
+        try:
+            # アップロード時
+            if self.request.POST.get('mode', '') == 'upload':
+
+                upload_file = self.request.FILES['upload_file']
+                accounting_period_id = self.request.POST.get('search_accounting_period', '')
+
+                # 役職ファイルアプロード処理
+                if not self.import_cost(upload_file, accounting_period_id):
+                    print('import_cost Error !!')
+
+            # 検索時
+            elif self.request.POST.get('mode', '') == 'search':
+
+                # セッションに検索値を設定
+                search_values = [
+                    self.request.POST.get('search_accounting_period', ''),
+                    self.request.POST.get('search_value', ''),
+                ]
+                request.session['search_values'] = search_values
+
+        except Exception as e:
+            print('Exception In !!')
+            print(e)
+
+        finally:
+            print('all finish')
+
+            # 検索時にページネーションに関連したエラーを防ぐ
+            self.request.GET = self.request.GET.copy()
+            self.request.GET.clear()
+            return self.get(request, *args, **kwargs)
+
     def import_cost(self, upload_file, accounting_period_id):
 
         try:
@@ -173,41 +208,6 @@ class CostListView(LoginRequiredMixin, ListView):
             print('all finish')
 
         return rc
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            # アップロード時
-            if self.request.POST.get('mode', '') == 'upload':
-
-                upload_file = self.request.FILES['upload_file']
-                accounting_period_id = self.request.POST.get('search_accounting_period', '')
-
-                # 役職ファイルアプロード処理
-                if not self.import_cost(upload_file, accounting_period_id):
-                    print('import_cost Error !!')
-
-            # 検索時
-            elif self.request.POST.get('mode', '') == 'search':
-
-                # セッションに検索値を設定
-                search_values = [
-                    self.request.POST.get('search_accounting_period', ''),
-                    self.request.POST.get('search_value', ''),
-                ]
-                request.session['search_values'] = search_values
-
-        except Exception as e:
-            print('Exception In !!')
-            print(e)
-
-        finally:
-            print('all finish')
-
-            # 検索時にページネーションに関連したエラーを防ぐ
-            self.request.GET = self.request.GET.copy()
-            self.request.GET.clear()
-            return self.get(request, *args, **kwargs)
 
 class CostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'master/cost/create.html'

@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db.models import Q
 
 from master.models import Employee
-from master.forms import EmployeeForm
+from master.forms import EmployeeForm, EmployeeSearchForm, EmployeeImportForm
 
 class EmployeeListView(LoginRequiredMixin, ListView):
     template_name = 'master/employee/index.html'
@@ -36,43 +36,81 @@ class EmployeeListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         # sessionに値がある場合、その値でクエリ発行する。
-        if 'search_value' in self.request.session:
+        if 'search_values' in self.request.session:
 
             # セッションから検索情報取得
-            search_value = self.request.session['search_value']
+            search_values = self.request.session['search_values']
 
             # 検索条件
             condition1 = Q()
             condition2 = Q()
             condition3 = Q()
-            condition4 = Q()
 
             # 検索文字が指定されている場合、条件設定
-            if len(search_value) != 0:
-                condition1 = Q(employee_no__istartswith=search_value)
-                condition2 = Q(name__istartswith=search_value)
-                condition3 = Q(employee_code__istartswith=search_value)
-                condition4 = Q(email__istartswith=search_value)
+            if len(search_values[0]) != 0:
+                condition1 = Q(employee_no__icontains=search_values[0])
+                condition2 = Q(name__icontains=search_values[0])
+                condition3 = Q(email__icontains=search_values[0])
 
             # 検索条件を指定して検索結果取得
-            return Employee.objects.select_related().filter(condition1 | condition2 | condition3 | condition4)
+            return Employee.objects.select_related().filter(
+                    condition1 | condition2 | condition3).order_by('-updated')
 
         else:
             # 検索条件指定なしの場合、全件取得
-            return Employee.objects.all()
+            return Employee.objects.select_related().all().order_by('-updated')
 
     def get_context_data(self, **kwargs):
-        print("get_context_data in")
+
         context = super().get_context_data(**kwargs)
 
-        search_value = ''
         # sessionに値がある場合、その値をセットする。（ページングしてもform値が変わらないように）
-        if 'search_value' in self.request.session:
-            search_value = self.request.session['search_value']
-        
-        context['search_value'] = search_value
+        if 'search_values' in self.request.session:
+            search_values = self.request.session['search_values']
+            default_data = {
+                'keyword': search_values[0],
+            }
+        else:
+            default_data = {
+                'keyword': '',
+            }
+
+        context['search_form'] = EmployeeSearchForm(initial=default_data)
+        context['import_form'] = EmployeeImportForm()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            # アップロード時
+            if self.request.POST.get('mode', '') == 'upload':
+
+                upload_file = self.request.FILES['upload_file']
+
+                # ファイルインポート処理
+                if not self.import_employee(upload_file):
+                    print('import_employee Error !!')
+
+            # 検索時
+            elif self.request.POST.get('mode', '') == 'search':
+                # セッションに検索値を設定
+                search_values = [
+                    self.request.POST.get('keyword', ''),
+                ]
+                request.session['search_values'] = search_values
+
+        except Exception as e:
+            print('Exception In !!')
+            print(e)
+
+        finally:
+            print('all finish')
+
+            # 検索時にページネーションに関連したエラーを防ぐ
+            self.request.GET = self.request.GET.copy()
+            self.request.GET.clear()
+            return self.get(request, *args, **kwargs)
 
     def import_employee(self, upload_file):
 
@@ -83,7 +121,7 @@ class EmployeeListView(LoginRequiredMixin, ListView):
             wb = openpyxl.load_workbook(upload_file, data_only=True)
 
             # 「sheet2」シートを参照
-            ws = wb['Sheet2']
+            ws = wb.worksheets[0]
 
             # 一括追加用配列
             insert_items = []
@@ -146,36 +184,6 @@ class EmployeeListView(LoginRequiredMixin, ListView):
             print('all finish')
 
         return rc
-    
-    def post(self, request, *args, **kwargs):
-
-        try:
-            # アップロード時
-            if self.request.POST.get('mode', '') == 'upload':
-
-                upload_file = self.request.FILES['upload_file']
-
-                # ファイルインポート処理
-                if not self.import_employee(upload_file):
-                    print('import_employee Error !!')
-
-            # 検索時
-            elif self.request.POST.get('mode', '') == 'search':
-                # セッションに検索値を設定
-                request.session['search_value'] = self.request.POST.get('search_value', '')
-
-        except Exception as e:
-            print('Exception In !!')
-            print(e)
-
-        finally:
-            print('all finish')
-
-            # 検索時にページネーションに関連したエラーを防ぐ
-            self.request.GET = self.request.GET.copy()
-            self.request.GET.clear()
-            return self.get(request, *args, **kwargs)
-
 
 class EmployeeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'master/employee/create.html'

@@ -1,0 +1,32 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+{% load humanize %}
+
+<!-- Search Modal -->
+<div class="modal fade" id="search_form" tabindex="-1" aria-labelledby="search_form_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form class="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="mode" name="mode" type="hidden" value="search" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="search_form_label">検索条件</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% bootstrap_form search_form layout='floating' size='sm' %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-magnifying-glass"></i> 検索
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 閉じる
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

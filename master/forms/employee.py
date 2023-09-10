@@ -15,3 +15,16 @@ class EmployeeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+class EmployeeSearchForm(forms.Form):
+    keyword = forms.fields.CharField(
+        label = 'キーワード検索',
+        required = False,
+        widget=forms.widgets.TextInput,
+    )
+
+class EmployeeImportForm(forms.Form):
+    upload_file = forms.fields.FileField(
+        label = 'アップロードファイル',
+        required = True,
+        widget=forms.widgets.FileInput,
+    )
