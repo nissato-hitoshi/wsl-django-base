@@ -21,8 +21,15 @@ class AffiliationSearchForm(forms.Form):
         label = '会計期',
         required = False,
     )
-    search_value = forms.fields.CharField(
+    keyword = forms.fields.CharField(
         label = 'キーワード検索',
         required = False,
         widget=forms.widgets.TextInput,
+    )
+
+class AffiliationImportForm(forms.Form):
+    upload_file = forms.fields.FileField(
+        label = 'アップロードファイル',
+        required = True,
+        widget=forms.widgets.FileInput,
     )

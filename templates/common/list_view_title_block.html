@@ -1,0 +1,33 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+{% load humanize %}
+
+<div class="row">
+    <div class="col-6">
+        <h4 class="mb-3">
+            <i class="fa-solid fa-table-list"></i> {{ title }}
+        </h4>
+    </div>
+    <div class="col-6 text-end">
+        {% if search %}
+        <a class="btn btn-outline-secondary btn-sm mb-2 me-2" href="?param=init" role="button" data-bs-toggle="tooltip" title="検索条件クリア">
+            <i class="fa-solid fa-eraser"></i>
+        </a>
+        <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#search_form" role="button" data-bs-toggle="tooltip" title="検索条件指定画面を開く">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </a>
+        {% endif %}
+        {% if upload %}
+        <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#upload_form" role="button" data-bs-toggle="tooltip" title="ファイルインポート画面を開く">
+            <i class="fa-solid fa-upload"></i>
+        </a>
+        {% endif %}
+        {% if append %}
+        <a href="{% url create_url %}" class="btn btn-primary btn-sm mb-2">
+            <i class="fa-solid fa-file-circle-plus"></i> 新規追加
+        </a>
+        {% endif %}
+    </div>
+</div>

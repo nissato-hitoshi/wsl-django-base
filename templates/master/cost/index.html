@@ -9,24 +9,7 @@
 
 {% block content %}
 <div class="container-fluid p-4 small">
-    <div class="row">
-        <div class="col-6">
-            <h4 class="mb-3">
-                <i class="fa-solid fa-table-list"></i> 原価一覧
-            </h4>
-        </div>
-        <div class="col-6 text-end">
-            <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#search_form" role="button">
-                <i class="fa-solid fa-filter"></i>
-            </a>
-            <a class="btn btn-outline-secondary btn-sm mb-2 me-2" data-bs-toggle="modal" href="#upload_form" role="button">
-                <i class="fa-solid fa-upload"></i>
-            </a>
-            <a href="{% url 'master.cost.create' %}" class="btn btn-primary btn-sm mb-3">
-                <i class="fa-solid fa-file-circle-plus"></i> 新規追加
-            </a>
-        </div>
-    </div>
+    {% include 'common/list_view_title_block.html' with title='原価一覧' search=True upload=True append=True create_url='master.cost.create' %}
     <div class="row">
         {% if items|length == 0 %}
         <div class="col-8 offset-2">
@@ -71,57 +54,7 @@
         </div>
         {% endif %}
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="upload_form" tabindex="-1" aria-labelledby="upload_form_label" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form class="" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input id="mode" name="mode" type="hidden" value="upload" />
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="search_form_label">ファイルアップロード</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        {% bootstrap_form import_form layout='horizontal' size='sm' %}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fa-solid fa-upload"></i> アップロード
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> 閉じる
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- Search Modal -->
-    <div class="modal fade" id="search_form" tabindex="-1" aria-labelledby="search_form_label" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form class="" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input id="mode" name="mode" type="hidden" value="search" />
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="search_form_label">検索条件</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        {% bootstrap_form search_form layout='horizontal' size='sm' %}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fa-solid fa-magnifying-glass"></i> 検索
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> 閉じる
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    {% include 'common/import_dialog_modal.html' %}
+    {% include 'common/search_dialog_modal.html' %}
 </div>
 {% endblock %}

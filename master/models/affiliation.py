@@ -4,14 +4,13 @@ from .department import Department
 from .grade import Grade
 from .position import Position
 from .employee import Employee
+from .accounting_period import AccountingPeriod
 
 # Create your models here.
 
 # 所属マスタテーブル
 class Affiliation(models.Model):
-    accounting_period = models.SmallIntegerField(verbose_name="会計期", blank=False, null=False,)
-    start_date = models.DateField(verbose_name="所属開始日", blank=False, null=False,)
-    end_date = models.DateField(verbose_name="所属終了日", blank=False, null=False,)
+    accounting_period = models.ForeignKey(AccountingPeriod, on_delete=models.SET_NULL, null=True, verbose_name="会計期")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, verbose_name="部門")
     position = models.ForeignKey(Position, on_delete=models.SET_NULL, null=True, verbose_name="役職")
     grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True, verbose_name="資格")

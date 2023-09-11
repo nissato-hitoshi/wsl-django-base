@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db.models import Q
 
 from master.models import Position
-from master.forms import PositionForm
+from master.forms import PositionForm, PositionSearchForm, PositionImportForm
 
 class PositionListView(LoginRequiredMixin, ListView):
     template_name = 'master/position/index.html'
@@ -18,20 +18,25 @@ class PositionListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
+        # param = 'init' の場合 セッションクリア
+        if self.request.GET.get('param', '') == 'init':
+            if 'position_search_values' in self.request.session:
+                del self.request.session['position_search_values']
+
         # sessionに値がある場合、その値でクエリ発行する。
-        if 'search_value' in self.request.session:
+        if 'position_search_values' in self.request.session:
 
             # セッションから検索情報取得
-            search_value = self.request.session['search_value']
+            search_values = self.request.session['position_search_values']
 
             # 検索条件
             condition1 = Q()
             condition2 = Q()
 
             # 検索文字が指定されている場合、条件設定
-            if len(search_value) != 0:
-                condition1 = Q(position_name__istartswith=search_value)
-                condition2 = Q(position_code__istartswith=search_value)
+            if len(search_values[0]) != 0:
+                condition1 = Q(position_name__icontains=search_values[0])
+                condition2 = Q(position_code__icontains=search_values[0])
 
             # 検索条件を指定して検索結果取得
             return Position.objects.select_related().filter(condition1 | condition2).order_by('display_order')
@@ -41,26 +46,62 @@ class PositionListView(LoginRequiredMixin, ListView):
             return Position.objects.all().order_by('display_order')
 
     def get_context_data(self, **kwargs):
-        print("get_context_data in")
+
         context = super().get_context_data(**kwargs)
 
-        search_value = ''
-
         # sessionに値がある場合、その値をセットする。（ページングしてもform値が変わらないように）
-        if 'search_value' in self.request.session:
-            search_value = self.request.session['search_value']
+        if 'position_search_values' in self.request.session:
+            search_values = self.request.session['position_search_values']
+            default_data = {
+                'keyword': search_values[0],
+            }
+        else:
+            default_data = {
+                'keyword': '',
+            }
         
-        context['search_value'] = search_value
+        context['search_form'] = PositionSearchForm(initial=default_data)
+        context['import_form'] = PositionImportForm()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            # アップロード時
+            if self.request.POST.get('mode', '') == 'upload':
+
+                upload_file = self.request.FILES['upload_file']
+
+                # 役職ファイルアプロード処理
+                if not self.import_position(upload_file):
+                    print('import_position Error !!')
+
+            # 検索時
+            elif self.request.POST.get('mode', '') == 'search':
+
+                # セッションに検索値を設定
+                search_values = [
+                    self.request.POST.get('keyword', ''),
+                ]
+                request.session['position_search_values'] = search_values
+
+        except Exception as e:
+            print(e)
+
+        finally:
+            # 検索時にページネーションに関連したエラーを防ぐ
+            self.request.GET = self.request.GET.copy()
+            self.request.GET.clear()
+            return self.get(request, *args, **kwargs)
 
     def import_position(self, upload_file):
         try:
             # アップロードファイルのオープン
             wb = openpyxl.load_workbook(upload_file, data_only=True)
 
-            # 「sheet1」シートを参照
-            ws = wb['Sheet1']
+            # 先頭シートを参照
+            ws = wb.worksheets[0]
 
             # 一括追加用配列
             insert_items = []
@@ -107,44 +148,10 @@ class PositionListView(LoginRequiredMixin, ListView):
             rc = True
 
         except Exception as e:
-            print('Exception In !!')
             print(e)
             rc = False
 
-        finally:
-            print('all finish')
-
         return rc
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            # アップロード時
-            if self.request.POST.get('mode', '') == 'upload':
-
-                upload_file = self.request.FILES['upload_file']
-
-                # 役職ファイルアプロード処理
-                if not self.import_position(upload_file):
-                    print('import_position Error !!')
-
-            # 検索時
-            elif self.request.POST.get('mode', '') == 'search':
-
-                # セッションに検索値を設定
-                request.session['search_value'] = self.request.POST.get('search_value', '')
-
-        except Exception as e:
-            print('Exception In !!')
-            print(e)
-
-        finally:
-            print('all finish')
-
-            # 検索時にページネーションに関連したエラーを防ぐ
-            self.request.GET = self.request.GET.copy()
-            self.request.GET.clear()
-            return self.get(request, *args, **kwargs)
 
 class PositionCreateView(LoginRequiredMixin, CreateView):
     template_name = 'master/position/create.html'

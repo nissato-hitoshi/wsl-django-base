@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db.models import Q
 
 from master.models import AccountingPeriod
-from master.forms import AccountingPeriodForm
+from master.forms import AccountingPeriodForm, AccountingPeriodSearchForm, AccountingPeriodImportForm
 
 class AccountingPeriodListView(LoginRequiredMixin, ListView):
     template_name = 'master/accounting_period/index.html'
@@ -35,18 +35,23 @@ class AccountingPeriodListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
+        # param = 'init' の場合 セッションクリア
+        if self.request.GET.get('param', '') == 'init':
+            if 'accounting_period_search_values' in self.request.session:
+                del self.request.session['accounting_period_search_values']
+
         # sessionに値がある場合、その値でクエリ発行する。
-        if 'search_value' in self.request.session:
+        if 'accounting_period_search_values' in self.request.session:
 
             # セッションから検索情報取得
-            search_value = self.request.session['search_value']
+            search_values = self.request.session['accounting_period_search_values']
 
             # 検索条件
             condition1 = Q()
 
             # 検索文字が指定されている場合、条件設定
-            if len(search_value) != 0:
-                condition1 = Q(accounting_period__istartswith=search_value)
+            if len(search_values) != 0:
+                condition1 = Q(accounting_period__icontains=search_values[0])
 
             # 検索条件を指定して検索結果取得
             return AccountingPeriod.objects.select_related().filter(condition1)
@@ -56,18 +61,54 @@ class AccountingPeriodListView(LoginRequiredMixin, ListView):
             return AccountingPeriod.objects.all()
 
     def get_context_data(self, **kwargs):
-        print("get_context_data in")
+
         context = super().get_context_data(**kwargs)
 
-        search_value = ''
-
         # sessionに値がある場合、その値をセットする。（ページングしてもform値が変わらないように）
-        if 'search_value' in self.request.session:
-            search_value = self.request.session['search_value']
-        
-        context['search_value'] = search_value
+        if 'accounting_period_search_values' in self.request.session:
+            search_values = self.request.session['accounting_period_search_values']
+            default_data = {
+                'keyword': search_values[0],
+            }
+        else:
+            default_data = {
+                'keyword': '',
+            }
+
+        context['search_form'] = AccountingPeriodSearchForm(initial=default_data)
+        context['import_form'] = AccountingPeriodImportForm()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            # アップロード時
+            if self.request.POST.get('mode', '') == 'upload':
+
+                upload_file = self.request.FILES['upload_file']
+
+                # 役職ファイルアプロード処理
+                if not self.import_accounting_period(upload_file):
+                    print('import_accounting_period Error !!')
+
+            # 検索時
+            elif self.request.POST.get('mode', '') == 'search':
+
+                # セッションに検索値を設定
+                search_values = [
+                    self.request.POST.get('keyword', ''),
+                ]
+                request.session['accounting_period_search_values'] = search_values
+
+        except Exception as e:
+            print(e)
+
+        finally:
+            # 検索時にページネーションに関連したエラーを防ぐ
+            self.request.GET = self.request.GET.copy()
+            self.request.GET.clear()
+            return self.get(request, *args, **kwargs)
 
     def import_accounting_period(self, upload_file):
 
@@ -75,8 +116,8 @@ class AccountingPeriodListView(LoginRequiredMixin, ListView):
             # アップロードファイルのオープン
             wb = openpyxl.load_workbook(upload_file, data_only=True)
 
-            # 「sheet1」シートを参照
-            ws = wb['Sheet1']
+            # 先頭シートを参照
+            ws = wb.worksheets[0]
 
             # 一括追加用配列
             insert_items = []
@@ -113,56 +154,20 @@ class AccountingPeriodListView(LoginRequiredMixin, ListView):
 
             # 更新リストデータが存在する場合
             if len(update_items) > 0:
-                print('update : ' + str(len(update_items)))
                 AccountingPeriod.objects.bulk_update(update_items, ['start_date','end_date','updated'])
 
             # 新規リストデータが存在する場合
             if len(insert_items) > 0:
-                print('insert : ' + str(len(insert_items)))
                 AccountingPeriod.objects.bulk_create(insert_items)
 
             wb.close()
             rc = True
 
         except Exception as e:
-            print('Exception In !!')
             print(e)
             rc = False
 
-        finally:
-            print('all finish')
-
         return rc
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            # アップロード時
-            if self.request.POST.get('mode', '') == 'upload':
-
-                upload_file = self.request.FILES['upload_file']
-
-                # 役職ファイルアプロード処理
-                if not self.import_accounting_period(upload_file):
-                    print('import_accounting_period Error !!')
-
-            # 検索時
-            elif self.request.POST.get('mode', '') == 'search':
-
-                # セッションに検索値を設定
-                request.session['search_value'] = self.request.POST.get('search_value', '')
-
-        except Exception as e:
-            print('Exception In !!')
-            print(e)
-
-        finally:
-            print('all finish')
-
-            # 検索時にページネーションに関連したエラーを防ぐ
-            self.request.GET = self.request.GET.copy()
-            self.request.GET.clear()
-            return self.get(request, *args, **kwargs)
 
 class AccountingPeriodCreateView(LoginRequiredMixin, CreateView):
     template_name = 'master/accounting_period/create.html'

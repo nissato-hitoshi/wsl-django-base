@@ -35,11 +35,16 @@ class EmployeeListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
+        # param = 'init' の場合 セッションクリア
+        if self.request.GET.get('param', '') == 'init':
+            if 'employee_search_values' in self.request.session:
+                del self.request.session['employee_search_values']
+
         # sessionに値がある場合、その値でクエリ発行する。
-        if 'search_values' in self.request.session:
+        if 'employee_search_values' in self.request.session:
 
             # セッションから検索情報取得
-            search_values = self.request.session['search_values']
+            search_values = self.request.session['employee_search_values']
 
             # 検索条件
             condition1 = Q()
@@ -65,8 +70,8 @@ class EmployeeListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         # sessionに値がある場合、その値をセットする。（ページングしてもform値が変わらないように）
-        if 'search_values' in self.request.session:
-            search_values = self.request.session['search_values']
+        if 'employee_search_values' in self.request.session:
+            search_values = self.request.session['employee_search_values']
             default_data = {
                 'keyword': search_values[0],
             }
@@ -98,15 +103,12 @@ class EmployeeListView(LoginRequiredMixin, ListView):
                 search_values = [
                     self.request.POST.get('keyword', ''),
                 ]
-                request.session['search_values'] = search_values
+                self.request.session['employee_search_values'] = search_values
 
         except Exception as e:
-            print('Exception In !!')
             print(e)
 
         finally:
-            print('all finish')
-
             # 検索時にページネーションに関連したエラーを防ぐ
             self.request.GET = self.request.GET.copy()
             self.request.GET.clear()
@@ -120,7 +122,7 @@ class EmployeeListView(LoginRequiredMixin, ListView):
             # アップロードファイルのオープン
             wb = openpyxl.load_workbook(upload_file, data_only=True)
 
-            # 「sheet2」シートを参照
+            # 先頭シートを参照
             ws = wb.worksheets[0]
 
             # 一括追加用配列
@@ -176,12 +178,8 @@ class EmployeeListView(LoginRequiredMixin, ListView):
             rc = True
 
         except Exception as e:
-            print('Exception In !!')
             print(e)
             rc = False
-
-        finally:
-            print('all finish')
 
         return rc
 
