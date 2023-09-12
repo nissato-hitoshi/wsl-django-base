@@ -2,6 +2,7 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
+{% load humanize %}
 
 {% block head_title %}会計期間情報 削除{% endblock %}
 
@@ -21,35 +22,19 @@
           <label class="form-label">会計期</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.start_date }}" class="form-control" disabled readonly>
+          <input type="text" value="{{ item.start_date|date:'Y/m/d' }}" class="form-control" disabled readonly>
           <label class="form-label">開始日</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.end_date }}" class="form-control" disabled readonly>
+          <input type="text" value="{{ item.end_date|date:'Y/m/d' }}" class="form-control" disabled readonly>
           <label class="form-label">終了日</label>
         </div>
         <div class="mb-3 form-floating">
-            <input type="text" value="{{ item.department }}" class="form-control" disabled readonly>
-            <label class="form-label">部門</label>
-        </div>
-        <div class="mb-3 form-floating">
-            <input type="text" value="{{ item.position }}" class="form-control" disabled readonly>
-            <label class="form-label">役職</label>
-        </div>
-        <div class="mb-3 form-floating">
-            <input type="text" value="{{ item.grade }}" class="form-control" disabled readonly>
-            <label class="form-label">資格</label>
-        </div>
-        <div class="mb-3 form-floating">
-            <input type="text" value="{{ item.employee }}" class="form-control" disabled readonly>
-            <label class="form-label">氏名</label>
-        </div>
-        <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.created }}" class="form-control" disabled readonly>
+          <input type="text" value='{{ item.created|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">登録日時</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.updated }}" class="form-control" disabled readonly>
+          <input type="text" value='{{ item.updated|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">更新日時</label>
         </div>
         {% bootstrap_button button_type="submit" content="はい" size="md" button_class="btn btn-danger" %}

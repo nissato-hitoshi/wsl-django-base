@@ -3,7 +3,7 @@
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
 
-{% block head_title %}部門情報 登録{% endblock %}
+{% block head_title %}取引先情報 登録{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4 small">
@@ -13,13 +13,13 @@
       <form method="POST">
         <div class="row mb-3">
           <div class="col-6">
-            <h4>部門情報 新規登録</h4>
+            <h4>取引先情報 新規登録</h4>
           </div>
           <div class="col-6 text-end">
             <button type="submit" class="btn btn-primary btn-md">
               <i class="fa-solid fa-floppy-disk"></i> 登録
             </button>
-            <a href="{% url 'master.department.index' %}" class="btn btn-secondary btn-md">
+            <a href="{% url 'master.client.index' %}" class="btn btn-secondary btn-md">
               <i class="fa-solid fa-ban"></i> キャンセル
             </a>
           </div>
@@ -29,7 +29,7 @@
         <button type="submit" class="btn btn-primary btn-md">
           <i class="fa-solid fa-floppy-disk"></i> 登録
         </button>
-        <a href="{% url 'master.department.index' %}" class="btn btn-secondary btn-md">
+        <a href="{% url 'master.client.index' %}" class="btn btn-secondary btn-md">
           <i class="fa-solid fa-ban"></i> キャンセル
         </a>
       </form>

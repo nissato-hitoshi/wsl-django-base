@@ -2,6 +2,7 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
+{% load humanize %}
 
 {% block head_title %}会計期間情報 編集{% endblock %}
 
@@ -27,11 +28,11 @@
         {% csrf_token %}
         {% bootstrap_form form layout='floating' %}
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.created }}" class="form-control" disabled readonly>
+          <input type="text" value='{{ item.created|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">登録日時</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.updated }}" class="form-control" disabled readonly>
+          <input type="text" value='{{ item.updated|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">更新日時</label>
         </div>
         <button type="submit" class="btn btn-primary btn-md">

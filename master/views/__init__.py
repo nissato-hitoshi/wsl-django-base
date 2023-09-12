@@ -7,3 +7,4 @@ from .department import DepartmentListView, DepartmentCreateView, DepartmentUpda
 from .affiliation import AffiliationListView, AffiliationCreateView, AffiliationUpdateView, AffiliationDeleteView
 from .accounting_period import AccountingPeriodListView, AccountingPeriodCreateView, AccountingPeriodUpdateView, AccountingPeriodDeleteView
 from .cost import CostListView, CostCreateView, CostUpdateView, CostDeleteView
+from .client import ClientListView, ClientCreateView, ClientUpdateView, ClientDeleteView

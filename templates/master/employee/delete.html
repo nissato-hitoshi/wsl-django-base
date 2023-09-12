@@ -2,6 +2,7 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load bootstrap_icons %}
+{% load humanize %}
 
 {% block head_title %}社員情報 削除{% endblock %}
 
@@ -25,15 +26,31 @@
           <label class="form-label">氏名</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.email }}" class="form-control" disabled readonly>
-          <label class="form-label">氏名</label>
+          <input type="text" value="{{ item.employee_code }}" class="form-control" disabled readonly>
+          <label class="form-label">社員コード</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.created }}" class="form-control" disabled readonly>
+          <input type="text" value="{{ item.email }}" class="form-control" disabled readonly>
+          <label class="form-label">メール</label>
+        </div>
+        <div class="mb-3 form-floating">
+          <input type="text" value='{{ item.date_of_birth|date:"Y/m/d"|default:"" }}' class="form-control" disabled readonly>
+          <label class="form-label">生年月日</label>
+        </div>
+        <div class="mb-3 form-floating">
+          <input type="text" value='{{ item.hire_date|date:"Y/m/d"|default:"" }}' class="form-control" disabled readonly>
+          <label class="form-label">入社日</label>
+        </div>
+        <div class="mb-3 form-floating">
+          <input type="text" value='{{ item.retirement_date|date:"Y/m/d"|default:"" }}' class="form-control" disabled readonly>
+          <label class="form-label">退職日</label>
+        </div>
+        <div class="mb-3 form-floating">
+          <input type="text" value='{{ item.created|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">登録日時</label>
         </div>
         <div class="mb-3 form-floating">
-          <input type="text" value="{{ item.updated }}" class="form-control" disabled readonly>
+          <input type="text" value='{{ item.updated|date:"Y/m/d H:i:s" }}' class="form-control" disabled readonly>
           <label class="form-label">更新日時</label>
         </div>
         {% bootstrap_button button_type="submit" content="はい" size="md" button_class="btn btn-danger" %}

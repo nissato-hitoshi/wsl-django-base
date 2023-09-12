@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+{% load i18n %}
+{% load humanize %}
+
+{% block head_title %}取引先マスタ{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4 small">
+    {% include 'common/list_view_title_block.html' with title='取引先一覧' search=True upload=True append=True create_url='master.client.create' %}
+    <div class="row">
+        {% if items|length == 0 %}
+        <div class="col-8 offset-2">
+            <div class="alert alert-warning" role="alert">
+                検索結果が存在しません。
+            </div>
+        </div>
+        {% else %}
+        <table class="table table-hover table-striped table-bordered table-sm small">
+            <thead class="table-light text-center">
+                <tr>
+                    <th scope="col">取引先名</th>
+                    <th scope="col">取引先略料</th>
+                    <th scope="col">表示順</th>
+                    <th scope="col">登録日時</th>
+                    <th scope="col">更新日時</th>
+                    <th>　</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.client_name }}</td>
+                    <td>{{ item.client_name_s|default:"" }}</td>
+                    <td class="text-center">{{ item.display_order }}</td>
+                    <td class="text-center">{{ item.created|date:"Y/m/d H:i:s" }}</td>
+                    <td class="text-center">{{ item.updated|date:"Y/m/d H:i:s" }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'master.client.update' item.pk %}" class="btn btn-sm">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="{% url 'master.client.delete' item.pk %}" class="btn btn-sm">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination justify-content-center">
+            {% bootstrap_pagination page_obj %}
+        </div>
+        {% endif %}
+    </div>
+    {% include 'common/import_dialog_modal.html' %}
+    {% include 'common/search_dialog_modal.html' %}
+</div>
+{% endblock %}

@@ -65,11 +65,11 @@ class CostListView(LoginRequiredMixin, ListView):
                 condition4 = Q(employee__email__icontains=search_values[1])
 
             # 検索条件を指定して検索結果取得
-            return Cost.objects.select_related().filter(condition1, condition2 | condition3 | condition4).order_by('-accounting_period__accounting_period')
+            return Cost.objects.select_related().filter(condition1, condition2 | condition3 | condition4)
 
         else:
             # 検索条件指定なしの場合、全件取得
-            return Cost.objects.select_related().all().order_by('-accounting_period__accounting_period')
+            return Cost.objects.all()
 
     def get_context_data(self, **kwargs):
 

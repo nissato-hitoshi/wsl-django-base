@@ -5,3 +5,4 @@ from .department import DepartmentForm, DepartmentSearchForm, DepartmentImportFo
 from .affiliation import AffiliationForm, AffiliationSearchForm, AffiliationImportForm
 from .accounting_period import AccountingPeriodForm, AccountingPeriodSearchForm, AccountingPeriodImportForm
 from .cost import CostForm, CostSearchForm, CostImportForm
+from .client import ClientForm, ClientSearchForm, ClientImportForm
