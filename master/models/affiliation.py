@@ -21,4 +21,7 @@ class Affiliation(models.Model):
     class Meta:
 #        db_table = 'affiliation'
         verbose_name_plural = '所属マスター'
-#        ordering = ['-display_order']
+        ordering = ['department__display_order', 'position__display_order', 'grade__display_order']
+
+    def __str__(self):
+        return str(self.accounting_period) + ' : ' + str(self.department) + ' : ' + str(self.employee)

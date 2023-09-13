@@ -39,11 +39,11 @@ class ClientListView(LoginRequiredMixin, ListView):
                 condition2 = Q(client_name_s__icontains=search_values[0])
 
             # 検索条件を指定して検索結果取得
-            return Client.objects.all().filter(condition1 | condition2).order_by('display_order')
+            return Client.objects.all().filter(condition1 | condition2).order_by('display_order','-updated', 'id')
 
         else:
             # 検索条件指定なしの場合、全件取得
-            return Client.objects.all().order_by('display_order')
+            return Client.objects.all().order_by('display_order', '-updated', 'id')
 
     def get_context_data(self, **kwargs):
 

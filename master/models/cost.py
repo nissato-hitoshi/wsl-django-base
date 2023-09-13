@@ -1,14 +1,12 @@
 from django.db import models
 
-from .employee import Employee
-from .accounting_period import AccountingPeriod
+from .affiliation import Affiliation
 
 # Create your models here.
 
 # 概算原価マスタテーブル
 class Cost(models.Model):
-    accounting_period = models.ForeignKey(AccountingPeriod, on_delete=models.SET_NULL, null=True, verbose_name="会計期")
-    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, verbose_name="社員")
+    affiliation = models.ForeignKey(Affiliation, on_delete=models.SET_NULL, null=True, verbose_name="所属")
     cost1 = models.IntegerField(verbose_name="労務費", default=0)
     cost2 = models.IntegerField(verbose_name="通勤費", default=0)
     cost3 = models.IntegerField(verbose_name="間接労務費", default=0)

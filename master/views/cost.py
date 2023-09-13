@@ -5,9 +5,9 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 import openpyxl
 from datetime import datetime
-from django.db.models import Q
+from django.db.models import Q, FilteredRelation
 
-from master.models import Cost, Employee, AccountingPeriod
+from master.models import Cost, Affiliation, Employee, AccountingPeriod
 from master.forms import CostForm, CostSearchForm, CostImportForm
 
 class CostListView(LoginRequiredMixin, ListView):
@@ -51,26 +51,46 @@ class CostListView(LoginRequiredMixin, ListView):
             condition2 = Q()
             condition3 = Q()
             condition4 = Q()
+            condition5 = Q()
 
             # 検索文字が指定されている場合、条件設定
             if len(search_values[0]) != 0:
-                condition1 = Q(accounting_period=search_values[0])
+                condition1 = Q(affiliation__accounting_period_id=search_values[0])
             else:
-                condition1 = Q(accounting_period__gte=0)
+                condition1 = Q(affiliation__gte=0)
 
             # 検索文字が指定されている場合、条件設定
             if len(search_values[1]) != 0:
-                condition2 = Q(employee__name__icontains=search_values[1])
-                condition3 = Q(employee__employee_no__icontains=search_values[1])
-                condition4 = Q(employee__email__icontains=search_values[1])
+                condition2 = Q(affiliation__employee__name__icontains=search_values[1])
+                condition3 = Q(affiliation__employee__employee_no__icontains=search_values[1])
+                condition4 = Q(affiliation__employee__email__icontains=search_values[1])
+                condition5 = Q(affiliation__department__department_name__icontains=search_values[1])
 
             # 検索条件を指定して検索結果取得
-            return Cost.objects.select_related().filter(condition1, condition2 | condition3 | condition4)
+            result = Cost.objects.select_related('affiliation')\
+                    .filter(condition1, condition2 | condition3 | condition4 | condition5)
 
         else:
             # 検索条件指定なしの場合、全件取得
-            return Cost.objects.all()
+            result = Cost.objects.select_related('affiliation')
 
+        result = result\
+                    .order_by(\
+                        '-affiliation__accounting_period__accounting_period'\
+                        ,'affiliation__department__display_order'\
+                        ,'affiliation__position__display_order'\
+                        ,'affiliation__grade__display_order')\
+                    .values(\
+                         'affiliation__accounting_period__accounting_period'\
+                        ,'affiliation__department__department_name'\
+                        ,'affiliation__position__position_name'\
+                        ,'affiliation__grade__grade_name'\
+                        ,'affiliation__employee__name'\
+                        ,'pk','cost1', 'cost2', 'cost3', 'cost4', 'cost_total', 'updated', 'created')
+
+        print(result.query)
+        return result
+    
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
@@ -142,7 +162,7 @@ class CostListView(LoginRequiredMixin, ListView):
             lists = AccountingPeriod.objects.filter(id=accounting_period_id)
 
             if len(lists) == 0:
-                print('会計期を登録してください。：' + str(accounting_period_id))
+                print('会計期を登録してください。')
                 accounting_period = None
             else:
                 accounting_period = lists[0]
@@ -153,28 +173,27 @@ class CostListView(LoginRequiredMixin, ListView):
                     # b列（社員番号）の取得
                     col_b = str(ws.cell(row=i, column=2).value)
 
-                    # 社員情報の取得
-                    lists = Employee.objects.filter(employee_no=col_b)
-                    if len(lists) == 0:
-                        employee = None
-                    else:
-                        employee = lists[0]
+                    # 所属データ取得
+                    lists = Affiliation.objects.select_related('accounting_period','employee').\
+                                filter(accounting_period_id=accounting_period.id, employee__employee_no=str(col_b))
+                    print(lists.query)
 
-                    # 社員情報登録済の場合のみ追加・更新対象
-                    if employee is None:
-                        print('未登録ユーザー：' + col_b)
+                    if len(lists) == 0:
+                        print('会計期：' + str(accounting_period_id) + ' 社員番号：' + col_b + ' の所属を登録してください。')
+                        affiliation = None
                     else:
-                        # 会計期と氏名が同じデータ取得
+                        affiliation = lists[0]
+
+                        # 所属IDが同じデータ取得
                         result = Cost.objects.filter(
-                            accounting_period_id=accounting_period_id, employee_id=int(employee.id))
+                            affiliation_id=int(affiliation.id))
 
                         # 同じデータ存在確認
                         if not result.exists():
 
                             # 存在しない場合、新規登録
                             item = Cost(
-                                accounting_period = accounting_period,
-                                employee = employee,
+                                affiliation = affiliation,
                                 cost1 = int(ws.cell(row=i, column=4).value),
                                 cost2 = int(ws.cell(row=i, column=5).value),
                                 cost3 = int(ws.cell(row=i, column=7).value),

@@ -22,6 +22,9 @@
             <thead class="table-light text-center">
                 <tr>
                 <th scope="col">会計期</th>
+                <th scope="col">部門</th>
+                <th scope="col">役職</th>
+                <th scope="col">資格</th>
                 <th scope="col">氏名</th>
                 <th scope="col">概算原価</th>
                 <th scope="col">登録日時</th>
@@ -32,8 +35,11 @@
             <tbody class="align-middle">
             {% for item in items %}
                 <tr>
-                    <td class="text-center">{{ item.accounting_period.accounting_period }}</td>
-                    <td>{{ item.employee.name }}</td>
+                    <td class="text-center">{{ item.affiliation__accounting_period__accounting_period }}</td>
+                    <td>{{ item.affiliation__department__department_name }}</td>
+                    <td>{{ item.affiliation__position__position_name }}</td>
+                    <td>{{ item.affiliation__grade__grade_name }}</td>
+                    <td>{{ item.affiliation__employee__name }}</td>
                     <td class="text-end">{{ item.cost_total|intcomma }}</td>
                     <td class="text-center">{{ item.created|date:"Y/m/d H:i:s" }}</td>
                     <td class="text-center">{{ item.updated|date:"Y/m/d H:i:s" }}</td>
