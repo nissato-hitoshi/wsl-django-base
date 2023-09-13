@@ -8,3 +8,4 @@ from .affiliation import AffiliationListView, AffiliationCreateView, Affiliation
 from .accounting_period import AccountingPeriodListView, AccountingPeriodCreateView, AccountingPeriodUpdateView, AccountingPeriodDeleteView
 from .cost import CostListView, CostCreateView, CostUpdateView, CostDeleteView
 from .client import ClientListView, ClientCreateView, ClientUpdateView, ClientDeleteView
+from .partner import PartnerListView, PartnerCreateView, PartnerUpdateView, PartnerDeleteView

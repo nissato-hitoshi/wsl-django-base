@@ -6,3 +6,4 @@ from .affiliation import AffiliationForm, AffiliationSearchForm, AffiliationImpo
 from .accounting_period import AccountingPeriodForm, AccountingPeriodSearchForm, AccountingPeriodImportForm
 from .cost import CostForm, CostSearchForm, CostImportForm
 from .client import ClientForm, ClientSearchForm, ClientImportForm
+from .partner import PartnerForm, PartnerSearchForm, PartnerImportForm

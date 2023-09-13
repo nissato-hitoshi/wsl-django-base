@@ -10,6 +10,7 @@ from .views import AffiliationListView, AffiliationCreateView, AffiliationUpdate
 from .views import AccountingPeriodListView, AccountingPeriodCreateView, AccountingPeriodUpdateView, AccountingPeriodDeleteView
 from .views import CostListView, CostCreateView, CostUpdateView, CostDeleteView
 from .views import ClientListView, ClientCreateView, ClientUpdateView, ClientDeleteView
+from .views import PartnerListView, PartnerCreateView, PartnerUpdateView, PartnerDeleteView
 
 urlpatterns = [
 
@@ -65,4 +66,9 @@ urlpatterns = [
     path('client/update/<int:pk>/', ClientUpdateView.as_view(), name='master.client.update'),
     path('client/delete/<int:pk>/', ClientDeleteView.as_view(), name='master.client.delete'),
 
+    # partner
+    path('partner/index', PartnerListView.as_view(), name='master.partner.index'),
+    path('partner/create', PartnerCreateView.as_view(), name='master.partner.create'),
+    path('partner/update/<int:pk>/', PartnerUpdateView.as_view(), name='master.partner.update'),
+    path('partner/delete/<int:pk>/', PartnerDeleteView.as_view(), name='master.partner.delete'),
 ]

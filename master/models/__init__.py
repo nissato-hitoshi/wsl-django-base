@@ -6,3 +6,4 @@ from .affiliation import Affiliation
 from .accounting_period import AccountingPeriod
 from .cost import Cost
 from .client import Client
+from .partner import Partner
