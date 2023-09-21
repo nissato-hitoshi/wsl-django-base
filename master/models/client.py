@@ -11,7 +11,6 @@ class Client(models.Model):
     created = models.DateTimeField(verbose_name="登録日時", auto_now_add=True)
 
     class Meta:
-#        db_table = 'cost'
         verbose_name_plural = '取引先マスター'
         ordering = ['-updated']
 

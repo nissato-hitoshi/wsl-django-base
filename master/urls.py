@@ -27,20 +27,20 @@ urlpatterns = [
     # grade
     path('grade/index', GradeListView.as_view(), name='master.grade.index'),
     path('grade/create', GradeCreateView.as_view(), name='master.grade.create'),
-    path('grade/update/<int:pk>/', GradeUpdateView.as_view(), name='master.grade.update'),
-    path('grade/delete/<int:pk>/', GradeDeleteView.as_view(), name='master.grade.delete'),
+    path('grade/update/<str:pk>/', GradeUpdateView.as_view(), name='master.grade.update'),
+    path('grade/delete/<str:pk>/', GradeDeleteView.as_view(), name='master.grade.delete'),
  
     # position
     path('position/index', PositionListView.as_view(), name='master.position.index'),
     path('position/create', PositionCreateView.as_view(), name='master.position.create'),
-    path('position/update/<int:pk>/', PositionUpdateView.as_view(), name='master.position.update'),
-    path('position/delete/<int:pk>/', PositionDeleteView.as_view(), name='master.position.delete'),
+    path('position/update/<str:pk>/', PositionUpdateView.as_view(), name='master.position.update'),
+    path('position/delete/<str:pk>/', PositionDeleteView.as_view(), name='master.position.delete'),
  
     # department
     path('department/index', DepartmentListView.as_view(), name='master.department.index'),
     path('department/create', DepartmentCreateView.as_view(), name='master.department.create'),
-    path('department/update/<int:pk>/', DepartmentUpdateView.as_view(), name='master.department.update'),
-    path('department/delete/<int:pk>/', DepartmentDeleteView.as_view(), name='master.department.delete'),
+    path('department/update/<str:pk>/', DepartmentUpdateView.as_view(), name='master.department.update'),
+    path('department/delete/<str:pk>/', DepartmentDeleteView.as_view(), name='master.department.delete'),
  
     # affiliation
     path('affiliation/index', AffiliationListView.as_view(), name='master.affiliation.index'),

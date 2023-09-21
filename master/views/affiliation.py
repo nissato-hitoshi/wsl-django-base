@@ -9,29 +9,13 @@ from django.db.models import Q
 
 from master.models import Affiliation, Department, Grade, Position, Employee, AccountingPeriod
 from master.forms import AffiliationForm, AffiliationSearchForm, AffiliationImportForm
+from . import BaseView
 
-class AffiliationListView(LoginRequiredMixin, ListView):
+class AffiliationListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/affiliation/index.html'
     model = Affiliation
     paginate_by = 10
     context_object_name = 'items'
-
-    def nvl(self, value, default=''):
-        if value is None:
-            val = default
-        else:
-            val = str(value).strip()
-        return val
-
-    def convert_string_to_date(self, value, defalut=None):
-        
-        val = self.nvl(value, defalut)
-
-        if val is not None:
-            date_val = datetime.strptime(str(val), '%Y-%m-%d %H:%M:%S')
-            val = date_val.strftime('%Y-%m-%d')
-
-        return val
 
     def get_queryset(self):
 
@@ -144,7 +128,7 @@ class AffiliationListView(LoginRequiredMixin, ListView):
             while i <= ws.max_row:
 
                 # 会計期の取得
-                lists = AccountingPeriod.objects.filter(accounting_period=str(ws.cell(row=i, column=1).value))
+                lists = AccountingPeriod.objects.filter(accounting_period=int(ws.cell(row=i, column=1).value))
                 if len(lists) == 0:
                     accounting_period = None
                 else:
@@ -192,7 +176,7 @@ class AffiliationListView(LoginRequiredMixin, ListView):
                 else:
                     # 会計期と氏名が同じデータ取得
                     result = Affiliation.objects.filter(
-                        accounting_period=int(accounting_period.id)
+                        accounting_period=accounting_period
                         ,employee_id=int(employee.id))
 
                     # 同じデータ存在確認

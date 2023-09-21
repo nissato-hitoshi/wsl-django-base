@@ -9,29 +9,13 @@ from django.db.models import Q
 
 from master.models import AccountingPeriod
 from master.forms import AccountingPeriodForm, AccountingPeriodSearchForm, AccountingPeriodImportForm
+from . import BaseView
 
-class AccountingPeriodListView(LoginRequiredMixin, ListView):
+class AccountingPeriodListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/accounting_period/index.html'
     model = AccountingPeriod
     paginate_by = 10
     context_object_name = 'items'
-
-    def nvl(self, value, default=''):
-        if value is None:
-            val = default
-        else:
-            val = str(value).strip()
-        return val
-
-    def convert_string_to_date(self, value, defalut=None):
-        
-        val = self.nvl(value, defalut)
-
-        if val is not None:
-            date_val = datetime.strptime(str(val), '%Y-%m-%d %H:%M:%S')
-            val = date_val.strftime('%Y-%m-%d')
-
-        return val
 
     def get_queryset(self):
 

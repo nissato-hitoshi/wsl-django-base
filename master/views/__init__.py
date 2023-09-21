@@ -1,5 +1,6 @@
 from .top import TopView
 from .sample import SampleView
+from .base import BaseView
 from .employee import EmployeeListView, EmployeeCreateView, EmployeeUpdateView, EmployeeDeleteView
 from .grade import GradeListView, GradeCreateView, GradeUpdateView, GradeDeleteView
 from .position import PositionListView, PositionCreateView, PositionUpdateView, PositionDeleteView

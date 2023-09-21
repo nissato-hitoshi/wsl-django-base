@@ -9,8 +9,9 @@ from django.db.models import Q
 
 from master.models import Grade
 from master.forms import GradeForm, GradeSearchForm, GradeImportForm
+from . import BaseView
 
-class GradeListView(LoginRequiredMixin, ListView):
+class GradeListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/grade/index.html'
     model = Grade
     paginate_by = 10

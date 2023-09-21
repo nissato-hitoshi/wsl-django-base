@@ -9,8 +9,9 @@ from django.db.models import Q
 
 from master.models import Department
 from master.forms import DepartmentForm, DepartmentSearchForm, DepartmentImportForm
+from . import BaseView
 
-class DepartmentListView(LoginRequiredMixin, ListView):
+class DepartmentListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/department/index.html'
     model = Department
     paginate_by = 10

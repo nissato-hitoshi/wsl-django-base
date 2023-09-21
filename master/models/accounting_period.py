@@ -4,7 +4,7 @@ from django.db import models
 
 # 会計期間マスタテーブル
 class AccountingPeriod(models.Model):
-    accounting_period = models.SmallIntegerField(verbose_name="会計期", blank=False, null=False,)
+    accounting_period = models.SmallIntegerField(verbose_name="会計期", blank=False, null=False, primary_key=True,)
     start_date = models.DateField(verbose_name="開始日", blank=False, null=False,)
     end_date = models.DateField(verbose_name="終了日", blank=False, null=False,)
     updated = models.DateTimeField(verbose_name="更新日時", auto_now=True)

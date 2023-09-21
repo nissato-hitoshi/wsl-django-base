@@ -9,8 +9,9 @@ from django.db.models import Q
 
 from master.models import Partner
 from master.forms import PartnerForm, PartnerSearchForm, PartnerImportForm
+from . import BaseView
 
-class PartnerListView(LoginRequiredMixin, ListView):
+class PartnerListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/partner/index.html'
     model = Partner
     paginate_by = 10
@@ -50,7 +51,7 @@ class PartnerListView(LoginRequiredMixin, ListView):
 
         result = result.order_by('display_order', '-updated', 'id')
 
-        print(result.query)
+        #print(result.query)
         return result
     
     def get_context_data(self, **kwargs):

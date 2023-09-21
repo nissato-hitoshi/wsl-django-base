@@ -9,8 +9,9 @@ from django.db.models import Q
 
 from master.models import Position
 from master.forms import PositionForm, PositionSearchForm, PositionImportForm
+from . import BaseView
 
-class PositionListView(LoginRequiredMixin, ListView):
+class PositionListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/position/index.html'
     model = Position
     paginate_by = 10

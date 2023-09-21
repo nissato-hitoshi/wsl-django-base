@@ -9,29 +9,13 @@ from django.db.models import Q, FilteredRelation
 
 from master.models import Cost, Affiliation, Employee, AccountingPeriod
 from master.forms import CostForm, CostSearchForm, CostImportForm
+from . import BaseView
 
-class CostListView(LoginRequiredMixin, ListView):
+class CostListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/cost/index.html'
     model = Cost
     paginate_by = 10
     context_object_name = 'items'
-
-    def nvl(self, value, default=''):
-        if value is None:
-            val = default
-        else:
-            val = str(value).strip()
-        return val
-
-    def convert_string_to_date(self, value, defalut=None):
-        
-        val = self.nvl(value, defalut)
-
-        if val is not None:
-            date_val = datetime.strptime(str(val), '%Y-%m-%d %H:%M:%S')
-            val = date_val.strftime('%Y-%m-%d')
-
-        return val
 
     def get_queryset(self):
 
@@ -88,7 +72,7 @@ class CostListView(LoginRequiredMixin, ListView):
                         ,'affiliation__employee__name'\
                         ,'pk','cost1', 'cost2', 'cost3', 'cost4', 'cost_total', 'updated', 'created')
 
-        print(result.query)
+        #print(result.query)
         return result
     
     def get_context_data(self, **kwargs):
@@ -145,7 +129,7 @@ class CostListView(LoginRequiredMixin, ListView):
             self.request.GET.clear()
             return self.get(request, *args, **kwargs)
 
-    def import_cost(self, upload_file, accounting_period_id):
+    def import_cost(self, upload_file, key_value):
 
         try:
             # アップロードファイルのオープン
@@ -159,7 +143,7 @@ class CostListView(LoginRequiredMixin, ListView):
             update_items = []
 
             # 会計期データ取得
-            lists = AccountingPeriod.objects.filter(id=accounting_period_id)
+            lists = AccountingPeriod.objects.filter(accounting_period=key_value)
 
             if len(lists) == 0:
                 print('会計期を登録してください。')
@@ -175,11 +159,11 @@ class CostListView(LoginRequiredMixin, ListView):
 
                     # 所属データ取得
                     lists = Affiliation.objects.select_related('accounting_period','employee').\
-                                filter(accounting_period_id=accounting_period.id, employee__employee_no=str(col_b))
+                                filter(accounting_period=accounting_period, employee__employee_no=str(col_b))
                     print(lists.query)
 
                     if len(lists) == 0:
-                        print('会計期：' + str(accounting_period_id) + ' 社員番号：' + col_b + ' の所属を登録してください。')
+                        print('会計期：' + str(key_value) + ' 社員番号：' + col_b + ' の所属を登録してください。')
                         affiliation = None
                     else:
                         affiliation = lists[0]

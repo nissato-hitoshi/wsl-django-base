@@ -9,8 +9,9 @@ from django.db.models import Q
 
 from master.models import Client
 from master.forms import ClientForm, ClientSearchForm, ClientImportForm
+from . import BaseView
 
-class ClientListView(LoginRequiredMixin, ListView):
+class ClientListView(LoginRequiredMixin, ListView, BaseView):
     template_name = 'master/client/index.html'
     model = Client
     paginate_by = 10
